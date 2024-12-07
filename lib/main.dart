@@ -7,6 +7,7 @@ import 'package:flutter/rendering.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 
+
 void main() {
   runApp(const MyApp());
 }
@@ -43,13 +44,7 @@ class _ImageEditorState extends State<ImageEditor> {
   String fontFamily = 'Roboto'; // Default font family
 
   // List of available fonts
-  final List<String> fontOptions = [
-    'Roboto',
-    'Lobster',
-    'Pacifico',
-    'OpenSans',
-    'Anton',
-  ];
+
 
   Future<void> pickImage() async {
     final pickedImage = await picker.pickImage(source: ImageSource.gallery);
@@ -208,28 +203,7 @@ class _ImageEditorState extends State<ImageEditor> {
               ],
             ),
             const SizedBox(height: 10),
-            Row(
-              children: [
-                const Text("Font:"),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: DropdownButton<String>(
-                    value: fontFamily,
-                    items: fontOptions.map((String font) {
-                      return DropdownMenuItem(
-                        value: font,
-                        child: Text(font, style: TextStyle(fontFamily: font)),
-                      );
-                    }).toList(),
-                    onChanged: (String? newFont) {
-                      setState(() {
-                        fontFamily = newFont!;
-                      });
-                    },
-                  ),
-                ),
-              ],
-            ),
+
           ],
         ),
       ),
