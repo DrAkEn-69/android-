@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:share_plus/share_plus.dart';
 
 void main() {
   runApp(const MyApp());
@@ -35,10 +34,9 @@ class _ImageEditorState extends State<ImageEditor> {
   final ImagePicker picker = ImagePicker();
   XFile? selectedImage;
 
-
   final GlobalKey imageKey = GlobalKey();
 
-  String? text; // The text to overlay
+  String? text;
   double fontSize = 24;
   Offset textPosition = const Offset(50, 50);
   String fontFamily = 'Roboto';
@@ -51,24 +49,35 @@ class _ImageEditorState extends State<ImageEditor> {
     });
   }
 
-  Future<void> saveToGallery() async {
+  Future<String> get _localPath async {
+    final directory = await getApplicationDocumentsDirectory();
+    final memeDir = Directory('${directory.path}/memes');
+    if (!await memeDir.exists()) {
+      await memeDir.create(recursive: true);
+    }
+    return memeDir.path;
+  }
+
+  Future<void> saveToMemeDirectory() async {
     try {
       final boundary = imageKey.currentContext!.findRenderObject() as RenderRepaintBoundary;
       final ui.Image image = await boundary.toImage(pixelRatio: 3.0);
       final ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.png);
       final Uint8List pngBytes = byteData!.buffer.asUint8List();
 
-      final directory = await getApplicationDocumentsDirectory();
-      final file = File('${directory.path}/edited_image.png');
+      final String dirPath = await _localPath;
+      final String fileName = 'meme_${DateTime.now().millisecondsSinceEpoch}.png';
+      final String filePath = '$dirPath/$fileName';
+
+      final file = File(filePath);
       await file.writeAsBytes(pngBytes);
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Image saved to ${file.path}')),
+        SnackBar(content: Text('Image saved to $filePath')),
       );
-
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Failed to save image')),
+        SnackBar(content: Text('Failed to save image: ${e.toString()}')),
       );
     }
   }
@@ -157,10 +166,10 @@ class _ImageEditorState extends State<ImageEditor> {
                 const SizedBox(width: 10),
                 Expanded(
                   child: ElevatedButton.icon(
-                    onPressed: saveToGallery,
+                    onPressed: saveToMemeDirectory,
                     icon: const Icon(Icons.save),
                     label: const Text(
-                      "Save to Gallery",
+                      "Save Meme",
                       style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                     ),
                     style: ElevatedButton.styleFrom(
@@ -206,3 +215,4 @@ class _ImageEditorState extends State<ImageEditor> {
     );
   }
 }
+
