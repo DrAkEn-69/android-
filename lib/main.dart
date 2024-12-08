@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
-
+import 'package:share_plus/share_plus.dart';
 
 void main() {
   runApp(const MyApp());
@@ -35,16 +35,13 @@ class _ImageEditorState extends State<ImageEditor> {
   final ImagePicker picker = ImagePicker();
   XFile? selectedImage;
 
-  // Key to capture the widget for saving
+
   final GlobalKey imageKey = GlobalKey();
 
   String? text; // The text to overlay
-  double fontSize = 24; // Default font size
-  Offset textPosition = const Offset(50, 50); // Default text position
-  String fontFamily = 'Roboto'; // Default font family
-
-  // List of available fonts
-
+  double fontSize = 24;
+  Offset textPosition = const Offset(50, 50);
+  String fontFamily = 'Roboto';
 
   Future<void> pickImage() async {
     final pickedImage = await picker.pickImage(source: ImageSource.gallery);
@@ -61,7 +58,6 @@ class _ImageEditorState extends State<ImageEditor> {
       final ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.png);
       final Uint8List pngBytes = byteData!.buffer.asUint8List();
 
-      // Save the image to a temporary directory
       final directory = await getApplicationDocumentsDirectory();
       final file = File('${directory.path}/edited_image.png');
       await file.writeAsBytes(pngBytes);
@@ -69,6 +65,7 @@ class _ImageEditorState extends State<ImageEditor> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Image saved to ${file.path}')),
       );
+
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Failed to save image')),
@@ -203,7 +200,6 @@ class _ImageEditorState extends State<ImageEditor> {
               ],
             ),
             const SizedBox(height: 10),
-
           ],
         ),
       ),
