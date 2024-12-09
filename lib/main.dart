@@ -36,7 +36,7 @@ class _ImageEditorState extends State<ImageEditor> {
 
   final GlobalKey imageKey = GlobalKey();
 
-  String? text;
+  String? text; // The text to overlay
   double fontSize = 24;
   Offset textPosition = const Offset(50, 50);
   String fontFamily = 'Roboto';
@@ -49,26 +49,26 @@ class _ImageEditorState extends State<ImageEditor> {
     });
   }
 
-  Future<String> get _localPath async {
-    final directory = await getApplicationDocumentsDirectory();
-    final memeDir = Directory('${directory.path}/memes');
-    if (!await memeDir.exists()) {
-      await memeDir.create(recursive: true);
-    }
-    return memeDir.path;
-  }
-
-  Future<void> saveToMemeDirectory() async {
+  Future<void> saveToGallery() async {
     try {
+      // Capture the image
       final boundary = imageKey.currentContext!.findRenderObject() as RenderRepaintBoundary;
       final ui.Image image = await boundary.toImage(pixelRatio: 3.0);
       final ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.png);
       final Uint8List pngBytes = byteData!.buffer.asUint8List();
 
-      final String dirPath = await _localPath;
+      // Get the app's internal directory
+      final Directory appDir = await getApplicationDocumentsDirectory();
+
+      // Create the custom directory
+      final String dirPath = '${appDir.path}/images/meme-editor';
+      await Directory(dirPath).create(recursive: true);
+
+      // Generate a unique filename
       final String fileName = 'meme_${DateTime.now().millisecondsSinceEpoch}.png';
       final String filePath = '$dirPath/$fileName';
 
+      // Save the file
       final file = File(filePath);
       await file.writeAsBytes(pngBytes);
 
@@ -166,10 +166,12 @@ class _ImageEditorState extends State<ImageEditor> {
                 const SizedBox(width: 10),
                 Expanded(
                   child: ElevatedButton.icon(
-                    onPressed: saveToMemeDirectory,
+                    onPressed: () async {
+                      await saveToGallery();
+                    },
                     icon: const Icon(Icons.save),
                     label: const Text(
-                      "Save Meme",
+                      "Save to Gallery",
                       style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                     ),
                     style: ElevatedButton.styleFrom(
